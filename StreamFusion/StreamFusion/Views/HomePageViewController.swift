@@ -8,8 +8,9 @@
 import UIKit
 
 class HomePageViewController: UIViewController {
-    var moviesAndShows = ["Game of Thrones", "Game Night", "End Game", "The Imitation Game", "Squid Game", "Law and the Order", "The Shield", "Californication"]
-    var filteredMovies: [String] = []
+    private let viewModel = HomePageViewModel(service: APIService())
+    var moviesAndShows: [APIResponse.Data.MovieAndShow] = []
+    var filteredMovies: [APIResponse.Data.MovieAndShow] = []
     let searchBar = UISearchBar()
     
     override func viewDidLoad() {
@@ -20,6 +21,13 @@ class HomePageViewController: UIViewController {
         self.searchBar.delegate = self
         self.tableView.delegate = self
         self.tableView.dataSource = self
+        
+        viewModel.updateHandler = { [weak self] fetchedResults in
+            DispatchQueue.main.async {
+                self?.filteredMovies = fetchedResults
+                self?.tableView.reloadData()
+            }
+        }
     }
     
     private let tableView: UITableView = {
@@ -62,16 +70,13 @@ class HomePageViewController: UIViewController {
 }
 
 extension HomePageViewController: UISearchBarDelegate {
-
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-        if !searchText.isEmpty {
-            filteredMovies = moviesAndShows.filter { movieAndShow in
-                return movieAndShow.lowercased().contains(searchText.lowercased())
-            }
+        if searchText.isEmpty {
+            filteredMovies = []
+            tableView.reloadData()
         } else {
-            filteredMovies = moviesAndShows
+            viewModel.fetchResults(title: searchText)
         }
-        tableView.reloadData()
     }
 }
 
@@ -81,8 +86,8 @@ extension HomePageViewController: UITableViewDelegate, UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: SearchResultsTableViewCell.identifier, for: indexPath)
-        cell.textLabel?.text = filteredMovies[indexPath.row]
+        let cell = tableView.dequeueReusableCell(withIdentifier: SearchResultsTableViewCell.identifier, for: indexPath) as! SearchResultsTableViewCell
+        cell.textLabel?.text = filteredMovies[indexPath.row].l
         return cell
     }
 }
