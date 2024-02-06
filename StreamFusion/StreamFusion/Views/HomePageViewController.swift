@@ -18,16 +18,10 @@ class HomePageViewController: UIViewController {
         view.backgroundColor = .systemBlue
         setupUI()
         setupSearchBar()
+        setupUpdateHandler()
         self.searchBar.delegate = self
         self.tableView.delegate = self
         self.tableView.dataSource = self
-        
-        viewModel.updateHandler = { [weak self] fetchedResults in
-            DispatchQueue.main.async {
-                self?.filteredMovies = fetchedResults
-                self?.tableView.reloadData()
-            }
-        }
     }
     
     private let tableView: UITableView = {
@@ -66,6 +60,15 @@ class HomePageViewController: UIViewController {
             searchBar.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -20),
             searchBar.heightAnchor.constraint(equalToConstant: 70)
         ])
+    }
+    
+    private func setupUpdateHandler() {
+        viewModel.updateHandler = { [weak self] fetchedResults in
+            DispatchQueue.main.async {
+                self?.filteredMovies = fetchedResults
+                self?.tableView.reloadData()
+            }
+        }
     }
 }
 

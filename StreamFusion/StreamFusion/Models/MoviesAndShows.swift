@@ -31,3 +31,10 @@ struct APIResponse: Codable {
         }
     }
 }
+
+extension APIResponse.Data.MovieAndShow: Equatable {
+    static func == (lhs: APIResponse.Data.MovieAndShow, rhs: APIResponse.Data.MovieAndShow) -> Bool {
+        return lhs.id == rhs.id && lhs.l == rhs.l && lhs.q == rhs.q
+    }
+}
+
