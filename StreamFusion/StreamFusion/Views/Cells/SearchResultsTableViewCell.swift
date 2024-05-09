@@ -8,7 +8,7 @@
 import UIKit
 
 class SearchResultsTableViewCell: UITableViewCell {
-    static let identifier = "Cell"
+    static let identifier = "SearchCell"
     private let resultQueryLabel: UILabel = {
         let label = UILabel()
         label.textAlignment = .left

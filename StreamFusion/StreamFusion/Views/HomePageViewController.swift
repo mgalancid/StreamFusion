@@ -29,6 +29,7 @@ class HomePageViewController: UIViewController {
         tableView.backgroundColor = .systemBackground
         tableView.allowsSelection = true
         tableView.register(SearchResultsTableViewCell.self, forCellReuseIdentifier: SearchResultsTableViewCell.identifier)
+        tableView.register(ContentTableViewCell.self, forCellReuseIdentifier: ContentTableViewCell.identifier)
         return tableView
     }()
     
@@ -78,7 +79,9 @@ extension HomePageViewController: UISearchBarDelegate {
             filteredMovies = []
             tableView.reloadData()
         } else {
-            viewModel.fetchResults(title: searchText)
+            Task {
+               await viewModel.fetchResults(title: searchText)
+            }
         }
     }
 }

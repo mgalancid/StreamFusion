@@ -7,19 +7,19 @@
 
 import Foundation
 
-protocol ServiceProtocol {
-    func queryMoviesAndShows(title: String, completion: @escaping (Data?, URLResponse?, Error?) -> Void)
-}
-
 class APIService: ServiceProtocol {
     private var baseURL = APIConstants().baseURL
     private var headers = APIConstants().headers
     
-    func queryMoviesAndShows(title: String, completion: @escaping (Data?, URLResponse?, Error?) -> Void) {
+    enum ServiceError: Error {
+        case invalidURL
+        case requestFailed(Error)
+    }
+    
+    func queryMoviesAndShows(title: String) async throws -> (Data, URLResponse) {
         let endpoint = "/auto-complete?q=\(title)"
         guard let url = URL(string: baseURL + endpoint) else {
-            print("Invalid URL")
-            return
+            throw ServiceError.invalidURL
         }
         
         var request = URLRequest(url: url,
@@ -28,9 +28,11 @@ class APIService: ServiceProtocol {
         request.httpMethod = "GET"
         request.allHTTPHeaderFields = headers
         
-        let dataTask = URLSession.shared.dataTask(with: request) { (data, response, error) in
-            completion(data, response, error)
+        do {
+            let (data, response) = try await URLSession.shared.data(for: request)
+            return (data, response)
+        } catch  {
+            throw ServiceError.requestFailed(error)
         }
-        dataTask.resume()
     }
 }
